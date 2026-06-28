@@ -48,14 +48,14 @@
 /* Navbar */
 .navbar {
   height: 72px;
-  background: rgba(24, 21, 23, 0.85);
+  background: rgba(24, 21, 23, 0.95);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 28px;
-  z-index: 100;
+  z-index: 4000 !important;
 }
 
 .nav-brand {

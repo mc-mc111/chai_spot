@@ -124,25 +124,31 @@ const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, route
           <span class="count">(${shop.reviewCount || 0} reviews)</span>
         </div>
         <div class="popup-actions">
-          <button id="popup-details-${shop._id}" class="popup-btn primary">View Details</button>
-          <button id="popup-directions-${shop._id}" class="popup-btn secondary">Directions ↗</button>
+          <button class="popup-btn primary">View Details</button>
+          <button class="popup-btn secondary">Directions ↗</button>
         </div>
       `;
 
+      const detailsBtn = popupContent.querySelector('.popup-btn.primary');
+      const directionsBtn = popupContent.querySelector('.popup-btn.secondary');
+
+      if (detailsBtn) {
+        detailsBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onSelectShop(shop);
+        };
+      }
+      if (directionsBtn) {
+        directionsBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onRequestDirections(shop);
+        };
+      }
+
       const marker = L.marker([lat, lng], { icon: customIcon }).addTo(mapInstance.current);
       marker.bindPopup(popupContent);
-
-      marker.on('popupopen', () => {
-        const detailsBtn = document.getElementById(`popup-details-${shop._id}`);
-        const directionsBtn = document.getElementById(`popup-directions-${shop._id}`);
-
-        if (detailsBtn) {
-          detailsBtn.onclick = () => onSelectShop(shop);
-        }
-        if (directionsBtn) {
-          directionsBtn.onclick = () => onRequestDirections(shop);
-        }
-      });
 
       markersRef.current.push(marker);
     });
