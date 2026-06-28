@@ -13,7 +13,9 @@ const DirectionsPanel = ({
   pickedLocation,
   setPickedLocation,
   onStartNavSimulation,
-  onShiftToMap
+  onShiftToMap,
+  routeInfo: propRouteInfo,
+  setRouteInfo: propSetRouteInfo
 }) => {
   const [selectedDestination, setSelectedDestination] = useState(targetShop || (shops.length > 0 ? shops[0] : null));
   const [startType, setStartType] = useState('gps'); // 'gps', 'manual', or 'map'
@@ -22,7 +24,10 @@ const DirectionsPanel = ({
   const [selectedSuggestion, setSelectedSuggestion] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [routeInfo, setRouteInfo] = useState(null);
+  const [localRouteInfo, setLocalRouteInfo] = useState(null);
+
+  const routeInfo = propRouteInfo !== undefined ? propRouteInfo : localRouteInfo;
+  const setRouteInfo = propSetRouteInfo || setLocalRouteInfo;
 
   const autocompleteTimer = useRef(null);
 
@@ -146,6 +151,7 @@ const DirectionsPanel = ({
   };
 
   const handleClear = () => {
+    setRouteInfo(null);
     onRouteCalculated(null);
     setIsPickingLocation(false);
     setPickedLocation(null);

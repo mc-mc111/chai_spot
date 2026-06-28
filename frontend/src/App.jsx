@@ -30,6 +30,7 @@ function App() {
   
   // Navigation route geometry & Simulation state
   const [routeGeoJson, setRouteGeoJson] = useState(null);
+  const [routeInfo, setRouteInfo] = useState(null);
   const [navSteps, setNavSteps] = useState(null);
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
 
@@ -83,6 +84,10 @@ function App() {
   };
 
   const handleRequestDirections = (shop) => {
+    if (!directionsTarget || directionsTarget._id !== shop._id) {
+      setRouteInfo(null);
+      setRouteGeoJson(null);
+    }
     setDirectionsTarget(shop);
   };
 
@@ -166,11 +171,14 @@ function App() {
                   <DirectionsPanel 
                     targetShop={directionsTarget}
                     shops={shops}
+                    routeInfo={routeInfo}
+                    setRouteInfo={setRouteInfo}
                     onClose={() => {
                       setDirectionsTarget(null);
                       setIsPickingLocation(false);
                       setPickedLocation(null);
                       setRouteGeoJson(null);
+                      setRouteInfo(null);
                     }}
                     onRouteCalculated={(geoJson) => setRouteGeoJson(geoJson)}
                     onShowToast={showToastNotification}
@@ -211,11 +219,14 @@ function App() {
                     <DirectionsPanel 
                       targetShop={directionsTarget}
                       shops={shops}
+                      routeInfo={routeInfo}
+                      setRouteInfo={setRouteInfo}
                       onClose={() => {
                         setDirectionsTarget(null);
                         setIsPickingLocation(false);
                         setPickedLocation(null);
                         setRouteGeoJson(null);
+                        setRouteInfo(null);
                       }}
                       onRouteCalculated={(geoJson) => setRouteGeoJson(geoJson)}
                       onShowToast={showToastNotification}
