@@ -28,7 +28,22 @@ const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, route
 
     mapInstance.current = map;
 
+    // Trigger invalidateSize after container renders to guarantee full coverage
+    setTimeout(() => {
+      if (mapInstance.current) {
+        mapInstance.current.invalidateSize();
+      }
+    }, 200);
+
+    const handleResize = () => {
+      if (mapInstance.current) {
+        mapInstance.current.invalidateSize();
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
     return () => {
+      window.removeEventListener('resize', handleResize);
       if (mapInstance.current) {
         mapInstance.current.remove();
         mapInstance.current = null;
@@ -148,7 +163,7 @@ const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, route
 
   return (
     <div className="map-wrapper">
-      <div ref={mapContainer} className="mapbox-container" style={{ width: '100%', height: '100%' }} />
+      <div ref={mapContainer} className="mapbox-container" />
     </div>
   );
 };
