@@ -22,7 +22,7 @@ const sampleReviewTexts = [
   "Amazing sunset view while sipping hot ginger tea. Unforgettable experience."
 ];
 
-const vijayawadaShops = [
+const reviewedShops = [
   {
     name: 'Prakasam Barrage View Chai Spot',
     address: 'Prakasam Barrage Road, Seetharampuram, Vijayawada, Andhra Pradesh 520002',
@@ -53,11 +53,83 @@ const vijayawadaShops = [
   }
 ];
 
+const unreviewedShops = [
+  {
+    name: 'Guruswamy Tiffin & Chai Corner',
+    address: 'Bhavanipuram Main Road, Vijayawada, Andhra Pradesh 520012',
+    location: { type: 'Point', coordinates: [80.5950, 16.5250] },
+    description: 'Local favorite for quick morning elachi chai and piping hot crisp samosas.',
+    photoUrl: 'https://images.unsplash.com/photo-1571934811356-5cc531a6821f?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    name: 'Satyanarayanapuram Lemon Tea Point',
+    address: 'Railway Station Road, Satyanarayanapuram, Vijayawada, Andhra Pradesh 520011',
+    location: { type: 'Point', coordinates: [80.6280, 16.5210] },
+    description: 'Refreshing honey lemon tea and mint herbal brews perfect for train travelers.',
+    photoUrl: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    name: 'Kanaka Durga Temple Hillside Chai Stop',
+    address: 'Ghat Road, Indrakeeladri, Vijayawada, Andhra Pradesh 520001',
+    location: { type: 'Point', coordinates: [80.6080, 16.5150] },
+    description: 'Scenic tea spot serving strong ginger tea to pilgrims ascending the temple hill.',
+    photoUrl: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    name: 'Autonagar Industrial Kadak Chai Stall',
+    address: '100 Feet Road, Autonagar, Vijayawada, Andhra Pradesh 520007',
+    location: { type: 'Point', coordinates: [80.6750, 16.4920] },
+    description: 'Famous among workers for extra strong jaggery (bellam) chai served in traditional steel glasses.',
+    photoUrl: 'https://images.unsplash.com/photo-1561336313-0bd5e0b27ec8?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    name: 'Labbipet Tandoori Chai Hub',
+    address: 'Tikka Road, Labbipet, Vijayawada, Andhra Pradesh 520010',
+    location: { type: 'Point', coordinates: [80.6380, 16.5020] },
+    description: 'Specialty tandoori chai infused with smoky clay pot flavors and aromatic spices.',
+    photoUrl: 'https://images.unsplash.com/photo-1597481499750-3e6b22637e12?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    name: 'Gunadala Mary Matha Tea Corner',
+    address: 'Eluru Road, Gunadala, Vijayawada, Andhra Pradesh 520004',
+    location: { type: 'Point', coordinates: [80.6620, 16.5280] },
+    description: 'Cozy roadside stall offering hot badam milk and special green cardamom tea.',
+    photoUrl: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    name: 'One Town Heritage Dum Tea House',
+    address: 'Kaleswara Rao Market, One Town, Vijayawada, Andhra Pradesh 520001',
+    location: { type: 'Point', coordinates: [80.6120, 16.5110] },
+    description: 'Vibrant heritage tea house serving classic Hyderabadi style Dum Chai since 1985.',
+    photoUrl: 'https://images.unsplash.com/photo-1597481499750-3e6b22637e12?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    name: 'Vijayawada Junction Night Chai Adda',
+    address: 'Platform Road, Railway Station Zone, Vijayawada, Andhra Pradesh 520001',
+    location: { type: 'Point', coordinates: [80.6210, 16.5090] },
+    description: '24/7 energetic tea hub known for midnight cutting chai and fresh onion samosas.',
+    photoUrl: 'https://images.unsplash.com/photo-1571934811356-5cc531a6821f?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    name: 'Patamata High School Road Chai Counter',
+    address: 'Pantakaluva Road, Patamata, Vijayawada, Andhra Pradesh 520010',
+    location: { type: 'Point', coordinates: [80.6550, 16.4950] },
+    description: 'Popular youth hangout spot serving chocolate chai, ice tea, and quick snacks.',
+    photoUrl: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    name: 'Tadepalli Bypass Tea & Coffee Lounge',
+    address: 'NH 16 Bypass Road, Tadepalli, Vijayawada region, Andhra Pradesh 522501',
+    location: { type: 'Point', coordinates: [80.6050, 16.4850] },
+    description: 'Spacious highway break stop offering filter coffee, ginger tea, and ample parking.',
+    photoUrl: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80'
+  }
+];
+
 const seedData = async () => {
   await connectDB();
 
   try {
-    // Create dummy admin user
     let adminUser = await User.findOne({ email: 'admin@chaispot.app' });
     if (!adminUser) {
       adminUser = await User.create({
@@ -68,7 +140,6 @@ const seedData = async () => {
       });
     }
 
-    // Create 3 community reviewer accounts for realistic seed reviews
     const reviewers = [];
     const reviewerData = [
       { name: 'Ravi Kumar', email: 'ravi@example.com' },
@@ -88,7 +159,8 @@ const seedData = async () => {
       reviewers.push(u);
     }
 
-    for (const s of vijayawadaShops) {
+    // 1. Seed shops with initial reviews
+    for (const s of reviewedShops) {
       let shop = await Shop.findOne({ name: s.name });
       if (!shop) {
         shop = await Shop.create({
@@ -100,12 +172,11 @@ const seedData = async () => {
         console.log(`Added shop: ${shop.name}`);
       }
 
-      // Add sample reviews for each shop if none exist
       const existingReviews = await Review.find({ shopId: shop._id });
       if (existingReviews.length === 0) {
         let sumRating = 0;
         for (let i = 0; i < reviewers.length; i++) {
-          const rating = 4 + (i % 2); // 4 or 5 star ratings
+          const rating = 4 + (i % 2);
           sumRating += rating;
           await Review.create({
             shopId: shop._id,
@@ -123,7 +194,29 @@ const seedData = async () => {
       }
     }
 
-    console.log('✅ Predefined Vijayawada shops and reviews seeded successfully!');
+    // 2. Seed 10 new shops WITHOUT any reviews
+    for (const s of unreviewedShops) {
+      let shop = await Shop.findOne({ name: s.name });
+      if (!shop) {
+        shop = await Shop.create({
+          ...s,
+          createdBy: adminUser._id,
+          averageRating: 0,
+          reviewCount: 0
+        });
+        console.log(`Added unreviewed shop: ${shop.name}`);
+      } else {
+        // Ensure no reviews exist and metrics are 0
+        await Review.deleteMany({ shopId: shop._id });
+        await Shop.findByIdAndUpdate(shop._id, {
+          averageRating: 0,
+          reviewCount: 0
+        });
+        console.log(`Reset unreviewed shop: ${shop.name}`);
+      }
+    }
+
+    console.log('✅ 10 unreviewed Vijayawada chai spots seeded successfully!');
     process.exit(0);
   } catch (err) {
     console.error('Seeding error:', err);
