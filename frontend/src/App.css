@@ -345,13 +345,13 @@
   left: 20px;
   width: 360px;
   max-height: calc(100% - 40px);
-  background: rgba(24, 21, 23, 0.92);
+  background: rgba(24, 21, 23, 0.95);
   backdrop-filter: blur(20px);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: 20px;
   box-shadow: var(--shadow-card);
-  z-index: 50;
+  z-index: 2000 !important;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -680,7 +680,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 200;
+  z-index: 3000 !important;
   padding: 20px;
 }
 
