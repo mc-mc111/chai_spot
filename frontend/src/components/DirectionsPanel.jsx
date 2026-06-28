@@ -11,7 +11,8 @@ const DirectionsPanel = ({
   isPickingLocation,
   setIsPickingLocation,
   pickedLocation,
-  setPickedLocation
+  setPickedLocation,
+  onStartNavSimulation
 }) => {
   const [selectedDestination, setSelectedDestination] = useState(targetShop || (shops.length > 0 ? shops[0] : null));
   const [startType, setStartType] = useState('gps'); // 'gps', 'manual', or 'map'
@@ -282,20 +283,37 @@ const DirectionsPanel = ({
             </div>
           </div>
 
+          <button 
+            type="button" 
+            className="start-sim-btn"
+            onClick={() => onStartNavSimulation && onStartNavSimulation(routeInfo.steps)}
+          >
+            <Navigation size={16} />
+            <span>🚗 Start Live Drive Simulation</span>
+          </button>
+
           {routeInfo.steps.length > 0 && (
             <div className="turn-instructions">
               <h4>Step-by-Step Directions</h4>
               <ol>
                 {routeInfo.steps.map((step, idx) => {
                   const type = step.maneuver?.type || 'drive';
-                  const modifier = step.maneuver?.modifier ? ` ${step.maneuver.modifier}` : '';
+                  const modifier = step.maneuver?.modifier || '';
                   const street = step.name ? ` onto ${step.name}` : '';
-                  let text = `${type.charAt(0).toUpperCase() + type.slice(1)}${modifier}${street}`;
-                  if (type === 'depart') text = `Head out${modifier}${street}`;
+                  let text = `${type.charAt(0).toUpperCase() + type.slice(1)}${modifier ? ' ' + modifier : ''}${street}`;
+                  if (type === 'depart') text = `Head out${modifier ? ' ' + modifier : ''}${street}`;
                   if (type === 'arrive') text = `Arrive at destination`;
+
+                  let iconSymbol = '⬆️';
+                  if (type === 'arrive') iconSymbol = '🎯';
+                  else if (type.includes('roundabout')) iconSymbol = '🔄';
+                  else if (modifier.includes('uturn')) iconSymbol = '↶';
+                  else if (modifier.includes('left')) iconSymbol = '↰';
+                  else if (modifier.includes('right')) iconSymbol = '↱';
 
                   return (
                     <li key={idx} className="step-item">
+                      <span className="step-icon-badge">{iconSymbol}</span>
                       <span className="step-text">{text}</span>
                       <span className="step-dist">({(step.distance / 1000).toFixed(1)} km)</span>
                     </li>

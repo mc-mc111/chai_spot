@@ -8,6 +8,7 @@ import DirectionsPanel from './components/DirectionsPanel';
 import UserProfile from './components/UserProfile';
 import AuthModal from './components/AuthModal';
 import Toast from './components/Toast';
+import NavSimulationHUD from './components/NavSimulationHUD';
 import { shopAPI } from './services/api';
 import { useAuth } from './context/AuthContext';
 import './App.css';
@@ -27,8 +28,10 @@ function App() {
   const [isPickingLocation, setIsPickingLocation] = useState(false);
   const [pickedLocation, setPickedLocation] = useState(null);
   
-  // Navigation route geometry
+  // Navigation route geometry & Simulation state
   const [routeGeoJson, setRouteGeoJson] = useState(null);
+  const [navSteps, setNavSteps] = useState(null);
+  const [currentStepIdx, setCurrentStepIdx] = useState(0);
 
   // Toast notification
   const [toast, setToast] = useState(null);
@@ -124,9 +127,29 @@ function App() {
                     setIsPickingLocation(false);
                     showToastNotification('📍 Starting location set from map click!', 'success');
                   }}
+                  navSteps={navSteps}
+                  currentStepIdx={currentStepIdx}
                 />
 
-                {selectedShop && !directionsTarget && (
+                {navSteps && (
+                  <NavSimulationHUD 
+                    steps={navSteps}
+                    currentStepIdx={currentStepIdx}
+                    onStepChange={(stepIdx) => {
+                      if (typeof stepIdx === 'function') {
+                        setCurrentStepIdx(stepIdx);
+                      } else {
+                        setCurrentStepIdx(stepIdx);
+                      }
+                    }}
+                    onClose={() => {
+                      setNavSteps(null);
+                      setCurrentStepIdx(0);
+                    }}
+                  />
+                )}
+
+                {selectedShop && !directionsTarget && !navSteps && (
                   <ShopModal 
                     shop={selectedShop}
                     onClose={() => setSelectedShop(null)}
@@ -140,7 +163,7 @@ function App() {
                   />
                 )}
 
-                {directionsTarget && (
+                {directionsTarget && !navSteps && (
                   <DirectionsPanel 
                     targetShop={directionsTarget}
                     shops={shops}
@@ -148,6 +171,7 @@ function App() {
                       setDirectionsTarget(null);
                       setIsPickingLocation(false);
                       setPickedLocation(null);
+                      setRouteGeoJson(null);
                     }}
                     onRouteCalculated={(geoJson) => setRouteGeoJson(geoJson)}
                     onShowToast={showToastNotification}
@@ -155,6 +179,11 @@ function App() {
                     setIsPickingLocation={setIsPickingLocation}
                     pickedLocation={pickedLocation}
                     setPickedLocation={setPickedLocation}
+                    onStartNavSimulation={(steps) => {
+                      setNavSteps(steps);
+                      setCurrentStepIdx(0);
+                      showToastNotification('🏎️ Live turn-by-turn simulation started!', 'info');
+                    }}
                   />
                 )}
               </div>

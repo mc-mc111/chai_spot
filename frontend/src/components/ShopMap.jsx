@@ -9,13 +9,18 @@ const ShopMap = ({
   routeGeoJson,
   isPickingLocation,
   pickedLocation,
-  onLocationPicked 
+  onLocationPicked,
+  navSteps,
+  currentStepIdx
 }) => {
   const mapContainer = useRef(null);
   const mapInstance = useRef(null);
   const markersRef = useRef([]);
   const routeLayerRef = useRef(null);
   const pickedMarkerRef = useRef(null);
+  const routeStartMarkerRef = useRef(null);
+  const routeEndMarkerRef = useRef(null);
+  const simCarMarkerRef = useRef(null);
 
   useEffect(() => {
     if (mapInstance.current) return; // Initialize map once
@@ -95,19 +100,19 @@ const ShopMap = ({
             <div class="marker-pin start">
               <span class="marker-icon">📍</span>
             </div>
-            <div class="marker-label start">Starting Point</div>
+            <div class="marker-label start">Start Location</div>
           </div>
         `,
         iconSize: [40, 50],
         iconAnchor: [20, 50]
       });
 
-      const marker = L.marker([lat, lng], { icon: startIcon }).addTo(mapInstance.current);
+      const marker = L.marker([lat, lng], { icon: startIcon, zIndexOffset: 1000 }).addTo(mapInstance.current);
       pickedMarkerRef.current = marker;
     }
   }, [pickedLocation]);
 
-  // Handle route geometry updates
+  // Handle route geometry & start/end route markers (Item 2 fix)
   useEffect(() => {
     if (!mapInstance.current) return;
 
@@ -115,13 +120,23 @@ const ShopMap = ({
       mapInstance.current.removeLayer(routeLayerRef.current);
       routeLayerRef.current = null;
     }
+    if (routeStartMarkerRef.current) {
+      routeStartMarkerRef.current.remove();
+      routeStartMarkerRef.current = null;
+    }
+    if (routeEndMarkerRef.current) {
+      routeEndMarkerRef.current.remove();
+      routeEndMarkerRef.current = null;
+    }
 
-    if (routeGeoJson && routeGeoJson.geometry) {
+    if (routeGeoJson && routeGeoJson.geometry && routeGeoJson.geometry.coordinates) {
+      const coords = routeGeoJson.geometry.coordinates; // [[lng, lat], ...]
+      
       const routeLayer = L.geoJSON(routeGeoJson, {
         style: {
           color: '#f97316',
-          weight: 5,
-          opacity: 0.85,
+          weight: 6,
+          opacity: 0.9,
           lineCap: 'round',
           lineJoin: 'round'
         }
@@ -129,12 +144,84 @@ const ShopMap = ({
 
       routeLayerRef.current = routeLayer;
 
+      if (coords.length > 0) {
+        const [startLng, startLat] = coords[0];
+        const [endLng, endLat] = coords[coords.length - 1];
+
+        // Start route marker
+        const startIcon = L.divIcon({
+          className: 'leaflet-custom-marker',
+          html: `
+            <div class="custom-map-marker start-pin">
+              <div class="marker-pin start">
+                <span class="marker-icon">🚀</span>
+              </div>
+              <div class="marker-label start">Start Point</div>
+            </div>
+          `,
+          iconSize: [40, 50],
+          iconAnchor: [20, 50]
+        });
+        routeStartMarkerRef.current = L.marker([startLat, startLng], { icon: startIcon, zIndexOffset: 1000 }).addTo(mapInstance.current);
+
+        // End route marker
+        const endIcon = L.divIcon({
+          className: 'leaflet-custom-marker',
+          html: `
+            <div class="custom-map-marker end-pin">
+              <div class="marker-pin end">
+                <span class="marker-icon">🎯</span>
+              </div>
+              <div class="marker-label end">Destination</div>
+            </div>
+          `,
+          iconSize: [40, 50],
+          iconAnchor: [20, 50]
+        });
+        routeEndMarkerRef.current = L.marker([endLat, endLng], { icon: endIcon, zIndexOffset: 1000 }).addTo(mapInstance.current);
+      }
+
       const bounds = routeLayer.getBounds();
-      if (bounds.isValid()) {
-        mapInstance.current.fitBounds(bounds, { padding: [50, 50] });
+      if (bounds.isValid() && navSteps === null) {
+        mapInstance.current.fitBounds(bounds, { padding: [60, 60] });
       }
     }
-  }, [routeGeoJson]);
+  }, [routeGeoJson, navSteps]);
+
+  // Handle simulation driver car movement (Item 3)
+  useEffect(() => {
+    if (!mapInstance.current) return;
+
+    if (simCarMarkerRef.current) {
+      simCarMarkerRef.current.remove();
+      simCarMarkerRef.current = null;
+    }
+
+    if (navSteps && navSteps.length > 0 && currentStepIdx >= 0) {
+      const step = navSteps[currentStepIdx];
+      if (step && step.maneuver && step.maneuver.location) {
+        const [lng, lat] = step.maneuver.location;
+
+        const carIcon = L.divIcon({
+          className: 'leaflet-custom-marker',
+          html: `
+            <div class="custom-map-marker car-sim-pin">
+              <div class="marker-pin car">
+                <span class="marker-icon">🏎️</span>
+              </div>
+            </div>
+          `,
+          iconSize: [44, 44],
+          iconAnchor: [22, 22]
+        });
+
+        const marker = L.marker([lat, lng], { icon: carIcon, zIndexOffset: 2000 }).addTo(mapInstance.current);
+        simCarMarkerRef.current = marker;
+
+        mapInstance.current.flyTo([lat, lng], 17, { duration: 1.0 });
+      }
+    }
+  }, [navSteps, currentStepIdx]);
 
   // Render shop markers
   useEffect(() => {
@@ -207,19 +294,19 @@ const ShopMap = ({
       markersRef.current.push(marker);
     });
 
-    if (boundsGroup.length > 0 && !routeGeoJson && !pickedLocation) {
+    if (boundsGroup.length > 0 && !routeGeoJson && !pickedLocation && !navSteps) {
       const bounds = L.latLngBounds(boundsGroup);
       mapInstance.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
     }
-  }, [shops, onSelectShop, onRequestDirections, routeGeoJson, pickedLocation]);
+  }, [shops, onSelectShop, onRequestDirections, routeGeoJson, pickedLocation, navSteps]);
 
   // Pan to selected shop
   useEffect(() => {
-    if (mapInstance.current && selectedShop && selectedShop.location) {
+    if (mapInstance.current && selectedShop && selectedShop.location && !navSteps) {
       const [lng, lat] = selectedShop.location.coordinates;
       mapInstance.current.flyTo([lat, lng], 15, { duration: 1.2 });
     }
-  }, [selectedShop]);
+  }, [selectedShop, navSteps]);
 
   return (
     <div className={`map-wrapper ${isPickingLocation ? 'picking-mode' : ''}`}>

@@ -903,7 +903,183 @@
 .shop-modal-title { font-size: 26px; font-weight: 800; }
 .shop-modal-address { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); margin-top: 4px; }
 
-.shop-modal-body { padding: 24px; }
+.shop-modal-body { 
+  padding: 24px 24px 40px 24px;
+  overflow-y: auto;
+}
+
+.no-reviews {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 12px;
+  color: var(--text-muted);
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.no-reviews p {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Turn-by-Turn Navigation Simulation HUD */
+.nav-simulation-hud {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 440px;
+  max-width: calc(100vw - 32px);
+  background: rgba(18, 16, 18, 0.96);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(249, 115, 22, 0.4);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
+  z-index: 2500 !important;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: slideDownHud 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDownHud {
+  from { transform: translate(-50%, -40px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+.hud-top-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hud-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary-orange), var(--chai-warm));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-glow);
+}
+
+.hud-instruction {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hud-step-counter {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--chai-gold);
+  text-transform: uppercase;
+}
+
+.hud-text {
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.hud-distance {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.hud-close-btn {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hud-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 10px;
+}
+
+.hud-ctrl-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.hud-ctrl-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.hud-ctrl-btn.play-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+}
+
+.hud-ctrl-btn.play-btn.playing {
+  background: #ef4444;
+}
+
+.start-sim-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 10px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+
+.step-icon-badge {
+  font-size: 15px;
+}
+
+.marker-pin.end {
+  background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
+}
+
+.marker-label.end {
+  background: rgba(239, 68, 68, 0.9) !important;
+}
+
+.marker-pin.car {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+  font-size: 20px;
+  border: 2px solid #fff;
+}
 
 .shop-meta-bar {
   display: flex;
