@@ -1,0 +1,111 @@
+@import 'mapbox-gl/dist/mapbox-gl.css';
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg-primary: #0f0d0e;
+  --bg-secondary: #181517;
+  --bg-card: rgba(28, 24, 27, 0.75);
+  --bg-glass: rgba(35, 30, 34, 0.65);
+  --border-color: rgba(255, 179, 71, 0.15);
+  --border-highlight: rgba(255, 179, 71, 0.4);
+  
+  --primary-orange: #f97316;
+  --primary-amber: #f59e0b;
+  --chai-gold: #fbbf24;
+  --chai-warm: #d97706;
+  --accent-glow: rgba(249, 115, 22, 0.25);
+  
+  --text-main: #fcfcfc;
+  --text-muted: #a1a1aa;
+  --text-dim: #71717a;
+  
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  
+  --shadow-glow: 0 0 25px rgba(249, 115, 22, 0.18);
+  --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.45);
+  
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+button {
+  font-family: var(--font-heading);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input, textarea, select {
+  font-family: var(--font-body);
+  outline: none;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--chai-warm);
+}
+
+/* Mapbox Customizations */
+.mapboxgl-popup-content {
+  background: rgba(24, 21, 23, 0.95) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md) !important;
+  color: var(--text-main) !important;
+  padding: 16px !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
+  border-top-color: rgba(24, 21, 23, 0.95) !important;
+}
+
+.mapboxgl-popup-close-button {
+  color: var(--text-muted) !important;
+  font-size: 18px !important;
+  padding: 4px 8px !important;
+}
+
+.mapboxgl-ctrl-group {
+  background: rgba(24, 21, 23, 0.85) !important;
+  border: 1px solid var(--border-color) !important;
+  backdrop-filter: blur(8px);
+}
+
+.mapboxgl-ctrl-group button {
+  border-bottom-color: var(--border-color) !important;
+}
