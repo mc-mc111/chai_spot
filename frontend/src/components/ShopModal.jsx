@@ -61,7 +61,7 @@ const ShopModal = ({ shop, onClose, onRequestDirections, onUpdateShopMetrics, on
           <div className="meta-item rating">
             <Star size={18} className="star-filled" />
             <span className="rating-num">{shop.averageRating ? shop.averageRating.toFixed(1) : 'New'}</span>
-            <span className="rating-sub">({reviews.length} reviews)</span>
+            <span className="rating-sub">({loadingReviews ? (shop.reviewCount || 0) : reviews.length} reviews)</span>
           </div>
 
           <button 
@@ -86,7 +86,7 @@ const ShopModal = ({ shop, onClose, onRequestDirections, onUpdateShopMetrics, on
 
         <div className="reviews-section">
           <div className="reviews-header">
-            <h3>Community Reviews ({reviews.length})</h3>
+            <h3>Community Reviews ({loadingReviews ? (shop.reviewCount || 0) : reviews.length})</h3>
             {existingUserReview && !isEditing && (
               <button className="edit-review-toggle" onClick={() => setIsEditing(true)}>
                 <Edit size={14} />
