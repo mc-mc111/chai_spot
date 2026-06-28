@@ -22,7 +22,7 @@ ChaiSpot is a full-stack MERN platform designed for tea lovers to discover nearb
 3. Set Build Command: `npm install`
 4. Set Start Command: `node server.js`
 5. Add Environment Variables in Render Dashboard:
-   - `MONGODB_URI`: `mongodb+srv://vijaymanicharan7920_db_user:1rmsn97Cl1JbOOAr@cluster0.sliz6jn.mongodb.net/chaispot?retryWrites=true&w=majority`
+   - `MONGODB_URI`: `your_mongodb_atlas_connection_string`
    - `JWT_SECRET`: `your_secure_jwt_secret_key`
    - `MAPBOX_ACCESS_TOKEN`: `your_mapbox_access_token`
    - `CLIENT_URL`: `https://your-frontend-app.vercel.app`
