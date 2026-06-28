@@ -73,9 +73,13 @@ const AddShopModal = ({
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!name.trim() || !address.trim()) {
-      setError('Shop name and address location are required.');
+    if (e) e.preventDefault();
+    if (!name.trim()) {
+      setError('Shop name is required.');
+      return;
+    }
+    if (!selectedSuggestion && (!pickedLocation || !pickedLocation.addressName)) {
+      setError('📍 Street location must be selected from the autocomplete dropdown suggestions or placed manually on the map using "Point on Map".');
       return;
     }
 

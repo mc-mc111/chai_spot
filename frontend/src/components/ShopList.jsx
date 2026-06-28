@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Star, MapPin, Navigation, MessageSquare, Search } from 'lucide-react';
 
+const DEFAULT_CHAI_PHOTO = 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80';
+
 const ShopList = ({ shops, onSelectShop, onRequestDirections }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -33,7 +35,7 @@ const ShopList = ({ shops, onSelectShop, onRequestDirections }) => {
         ) : (
           filteredShops.map(shop => (
             <div key={shop._id} className="shop-card">
-              <div className="shop-card-image" style={{ backgroundImage: `url(${shop.photoUrl})` }}>
+              <div className="shop-card-image" style={{ backgroundImage: `url(${shop.photoUrl || DEFAULT_CHAI_PHOTO})` }}>
                 <div className="shop-rating-tag">
                   <Star size={14} className="star-filled" />
                   <span>{shop.averageRating ? shop.averageRating.toFixed(1) : 'New'}</span>

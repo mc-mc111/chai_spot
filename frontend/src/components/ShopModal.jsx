@@ -4,6 +4,8 @@ import { reviewAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import ReviewForm from './ReviewForm';
 
+const DEFAULT_CHAI_PHOTO = 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80';
+
 const ShopModal = ({ shop, onClose, onRequestDirections, onUpdateShopMetrics, onShowToast, onOpenAuth, onShiftToMap }) => {
   const { user } = useAuth();
   const [reviews, setReviews] = useState([]);
@@ -59,7 +61,7 @@ const ShopModal = ({ shop, onClose, onRequestDirections, onUpdateShopMetrics, on
         </button>
       </div>
 
-      <div className="shop-modal-hero" style={{ backgroundImage: `url(${shop.photoUrl})` }}>
+      <div className="shop-modal-hero" style={{ backgroundImage: `url(${shop.photoUrl || DEFAULT_CHAI_PHOTO})` }}>
         <div className="hero-overlay">
           <h2 className="shop-modal-title">{shop.name}</h2>
           <p className="shop-modal-address">
