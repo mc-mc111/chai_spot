@@ -10,8 +10,8 @@ const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, route
   useEffect(() => {
     if (mapInstance.current) return; // Initialize map once
 
-    // Default center (Hyderabad, India / central hub) [lat, lng]
-    const defaultCenter = [17.3850, 78.4867];
+    // Default center (Vijayawada, Andhra Pradesh) [lat, lng]
+    const defaultCenter = [16.5062, 80.6480];
 
     const map = L.map(mapContainer.current, {
       center: defaultCenter,
