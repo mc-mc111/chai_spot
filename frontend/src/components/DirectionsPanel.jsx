@@ -12,7 +12,8 @@ const DirectionsPanel = ({
   setIsPickingLocation,
   pickedLocation,
   setPickedLocation,
-  onStartNavSimulation
+  onStartNavSimulation,
+  onShiftToMap
 }) => {
   const [selectedDestination, setSelectedDestination] = useState(targetShop || (shops.length > 0 ? shops[0] : null));
   const [startType, setStartType] = useState('gps'); // 'gps', 'manual', or 'map'
@@ -155,9 +156,22 @@ const DirectionsPanel = ({
           <Navigation size={20} className="nav-icon" />
           <h3>Get Directions</h3>
         </div>
-        <button className="side-panel-close-btn" onClick={handleClear} title="Close Panel">
-          <X size={18} />
-        </button>
+        <div className="header-actions">
+          {onShiftToMap && (
+            <button 
+              type="button" 
+              className="shift-map-header-btn"
+              onClick={onShiftToMap}
+              title="View route on interactive map"
+            >
+              <MapPin size={14} />
+              <span>Map Mode 🗺️</span>
+            </button>
+          )}
+          <button className="side-panel-close-btn" onClick={handleClear} title="Close Panel">
+            <X size={18} />
+          </button>
+        </div>
       </div>
 
       {error && (

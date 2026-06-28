@@ -84,7 +84,6 @@ function App() {
 
   const handleRequestDirections = (shop) => {
     setDirectionsTarget(shop);
-    setActiveTab('map');
   };
 
   return (
@@ -190,14 +189,43 @@ function App() {
             )}
 
             {activeTab === 'list' && (
-              <ShopList 
-                shops={shops}
-                onSelectShop={(shop) => {
-                  setSelectedShop(shop);
-                  setActiveTab('map');
-                }}
-                onRequestDirections={handleRequestDirections}
-              />
+              <div className="list-view-wrapper">
+                {directionsTarget && (
+                  <div className="list-directions-sidebar">
+                    <DirectionsPanel 
+                      targetShop={directionsTarget}
+                      shops={shops}
+                      onClose={() => {
+                        setDirectionsTarget(null);
+                        setIsPickingLocation(false);
+                        setPickedLocation(null);
+                        setRouteGeoJson(null);
+                      }}
+                      onRouteCalculated={(geoJson) => setRouteGeoJson(geoJson)}
+                      onShowToast={showToastNotification}
+                      isPickingLocation={isPickingLocation}
+                      setIsPickingLocation={setIsPickingLocation}
+                      pickedLocation={pickedLocation}
+                      setPickedLocation={setPickedLocation}
+                      onStartNavSimulation={(steps) => {
+                        setNavSteps(steps);
+                        setCurrentStepIdx(0);
+                        setActiveTab('map');
+                        showToastNotification('🏎️ Live turn-by-turn simulation started on map!', 'info');
+                      }}
+                      onShiftToMap={() => setActiveTab('map')}
+                    />
+                  </div>
+                )}
+                <ShopList 
+                  shops={shops}
+                  onSelectShop={(shop) => {
+                    setSelectedShop(shop);
+                    setActiveTab('map');
+                  }}
+                  onRequestDirections={handleRequestDirections}
+                />
+              </div>
             )}
           </div>
         )}

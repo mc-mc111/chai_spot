@@ -1258,3 +1258,61 @@
   .shop-list-header { flex-direction: column; align-items: flex-start; gap: 12px; }
   .search-bar { width: 100%; }
 }
+
+/* Inline Directions for List View Tab */
+.list-view-wrapper {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.list-directions-sidebar {
+  position: relative;
+  width: 400px;
+  max-width: 100%;
+  height: 100%;
+  background: rgba(20, 18, 20, 0.98);
+  border-right: 1px solid var(--border-color);
+  z-index: 100;
+  overflow-y: auto;
+  animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.list-directions-sidebar .directions-panel {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shift-map-header-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, var(--primary-orange), var(--chai-warm));
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: var(--shadow-glow);
+  transition: transform 0.2s;
+}
+
+.shift-map-header-btn:hover {
+  transform: translateY(-1px);
+}
