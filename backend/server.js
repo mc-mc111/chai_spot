@@ -13,22 +13,9 @@ const app = express();
 // Connect to MongoDB Atlas
 connectDB();
 
-// Middleware
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  'http://localhost:5173',
-  'http://localhost:3000'
-].filter(Boolean);
-
+// Middleware - Permissive CORS to support all Vercel domains and local dev
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, or server-to-server)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
-      return callback(null, true);
-    }
-    return callback(null, true); // Permissive CORS for deployed environments
-  },
+  origin: true,
   credentials: true
 }));
 

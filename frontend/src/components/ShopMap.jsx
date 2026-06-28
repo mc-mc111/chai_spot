@@ -38,6 +38,10 @@ const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, route
       'top-right'
     );
 
+    map.current.on('error', (e) => {
+      console.error('Mapbox GL error:', e);
+    });
+
     map.current.on('load', () => {
       // Add source for directions route
       map.current.addSource('route', {
