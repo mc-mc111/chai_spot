@@ -4,7 +4,7 @@ import { reviewAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import ReviewForm from './ReviewForm';
 
-const ShopModal = ({ shop, onClose, onRequestDirections, onUpdateShopMetrics, onShowToast, onOpenAuth }) => {
+const ShopModal = ({ shop, onClose, onRequestDirections, onUpdateShopMetrics, onShowToast, onOpenAuth, onShiftToMap }) => {
   const { user } = useAuth();
   const [reviews, setReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
@@ -42,9 +42,22 @@ const ShopModal = ({ shop, onClose, onRequestDirections, onUpdateShopMetrics, on
 
   return (
     <div className="google-maps-side-panel">
-      <button className="side-panel-close-btn" onClick={onClose} title="Close Panel">
-        <X size={18} />
-      </button>
+      <div className="side-panel-top-actions">
+        {onShiftToMap && (
+          <button 
+            type="button" 
+            className="shift-map-header-btn"
+            onClick={onShiftToMap}
+            title="View spot on interactive map"
+          >
+            <MapPin size={14} />
+            <span>Map Mode 🗺️</span>
+          </button>
+        )}
+        <button className="side-panel-close-btn" onClick={onClose} title="Close Panel">
+          <X size={18} />
+        </button>
+      </div>
 
       <div className="shop-modal-hero" style={{ backgroundImage: `url(${shop.photoUrl})` }}>
         <div className="hero-overlay">

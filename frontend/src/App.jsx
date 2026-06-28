@@ -190,6 +190,22 @@ function App() {
 
             {activeTab === 'list' && (
               <div className="list-view-wrapper">
+                {selectedShop && !directionsTarget && (
+                  <div className="list-directions-sidebar">
+                    <ShopModal 
+                      shop={selectedShop}
+                      onClose={() => setSelectedShop(null)}
+                      onRequestDirections={(shop) => {
+                        handleRequestDirections(shop);
+                      }}
+                      onUpdateShopMetrics={handleUpdateShopMetrics}
+                      onShowToast={showToastNotification}
+                      onOpenAuth={() => setShowAuth(true)}
+                      onShiftToMap={() => setActiveTab('map')}
+                    />
+                  </div>
+                )}
+
                 {directionsTarget && (
                   <div className="list-directions-sidebar">
                     <DirectionsPanel 
@@ -217,13 +233,17 @@ function App() {
                     />
                   </div>
                 )}
+
                 <ShopList 
                   shops={shops}
                   onSelectShop={(shop) => {
+                    setDirectionsTarget(null);
                     setSelectedShop(shop);
-                    setActiveTab('map');
                   }}
-                  onRequestDirections={handleRequestDirections}
+                  onRequestDirections={(shop) => {
+                    setSelectedShop(null);
+                    handleRequestDirections(shop);
+                  }}
                 />
               </div>
             )}

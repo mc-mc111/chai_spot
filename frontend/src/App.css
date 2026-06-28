@@ -368,10 +368,20 @@
   gap: 16px;
 }
 
-.side-panel-close-btn {
+.side-panel-top-actions {
   position: absolute;
   top: 14px;
   right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 30;
+}
+
+.side-panel-close-btn {
+  position: relative;
+  top: 0;
+  right: 0;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -381,7 +391,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 20;
   cursor: pointer;
   transition: background 0.2s;
 }
