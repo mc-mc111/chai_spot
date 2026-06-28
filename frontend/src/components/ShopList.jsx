@@ -35,7 +35,13 @@ const ShopList = ({ shops, onSelectShop, onRequestDirections }) => {
         ) : (
           filteredShops.map(shop => (
             <div key={shop._id} className="shop-card">
-              <div className="shop-card-image" style={{ backgroundImage: `url(${shop.photoUrl || DEFAULT_CHAI_PHOTO})` }}>
+              <div className="shop-card-image">
+                <img 
+                  src={shop.photoUrl || DEFAULT_CHAI_PHOTO} 
+                  alt={shop.name} 
+                  className="shop-card-img"
+                  onError={(e) => { e.target.onerror = null; e.target.src = DEFAULT_CHAI_PHOTO; }}
+                />
                 <div className="shop-rating-tag">
                   <Star size={14} className="star-filled" />
                   <span>{shop.averageRating ? shop.averageRating.toFixed(1) : 'New'}</span>

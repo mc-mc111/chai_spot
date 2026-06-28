@@ -61,7 +61,13 @@ const ShopModal = ({ shop, onClose, onRequestDirections, onUpdateShopMetrics, on
         </button>
       </div>
 
-      <div className="shop-modal-hero" style={{ backgroundImage: `url(${shop.photoUrl || DEFAULT_CHAI_PHOTO})` }}>
+      <div className="shop-modal-hero">
+        <img 
+          src={shop.photoUrl || DEFAULT_CHAI_PHOTO} 
+          alt={shop.name} 
+          className="modal-hero-img"
+          onError={(e) => { e.target.onerror = null; e.target.src = DEFAULT_CHAI_PHOTO; }}
+        />
         <div className="hero-overlay">
           <h2 className="shop-modal-title">{shop.name}</h2>
           <p className="shop-modal-address">

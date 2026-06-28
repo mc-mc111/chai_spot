@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, PlusCircle, MapPin, Image, FileText, Coffee, MousePointer, Compass } from 'lucide-react';
+import { X, PlusCircle, MapPin, Image, FileText, Coffee, MousePointer, Compass, ArrowLeft } from 'lucide-react';
 import { shopAPI } from '../services/api';
 
 const AddShopModal = ({ 
@@ -23,7 +23,7 @@ const AddShopModal = ({
 
   const autocompleteTimer = useRef(null);
 
-  // Sync address if user picked location on map
+  // Sync address if user picked location on map and auto un-minimize modal
   useEffect(() => {
     if (pickedLocation && pickedLocation.addressName) {
       setAddress(pickedLocation.addressName);
@@ -31,6 +31,10 @@ const AddShopModal = ({
         coords: pickedLocation.coords,
         display_name: pickedLocation.addressName
       });
+      if (setIsPickingLocation) {
+        setIsPickingLocation(false);
+      }
+      onShowToast('📍 Location captured cleanly from map!', 'success');
     }
   }, [pickedLocation]);
 
@@ -65,11 +69,13 @@ const AddShopModal = ({
   };
 
   const handleStartPickOnMap = () => {
-    setIsPickingLocation(true);
-    if (onShiftToMap) {
-      onShiftToMap();
-    }
-    onShowToast('📍 Click anywhere on the map to set the shop street address location!', 'info');
+    if (setIsPickingLocation) setIsPickingLocation(true);
+    if (onShiftToMap) onShiftToMap();
+    onShowToast('📍 Map activated! Click anywhere on the map to set the shop street address.', 'info');
+  };
+
+  const handleCancelPickOnMap = () => {
+    if (setIsPickingLocation) setIsPickingLocation(false);
   };
 
   const handleSubmit = async (e) => {
@@ -108,6 +114,24 @@ const AddShopModal = ({
     }
   };
 
+  // If picking location on map, render sleek floating dock bar so user can interact with full map on top!
+  if (isPickingLocation) {
+    return (
+      <div className="map-picking-dock-overlay">
+        <div className="map-picking-dock">
+          <div className="dock-info">
+            <MousePointer size={18} className="pulse-icon orange" />
+            <span><strong>MAP POINTER ACTIVE:</strong> Click anywhere on the interactive map below to select exact street address.</span>
+          </div>
+          <button type="button" className="dock-return-btn" onClick={handleCancelPickOnMap}>
+            <ArrowLeft size={15} />
+            <span>Return to Form</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-content add-shop-modal" onClick={(e) => e.stopPropagation()}>
@@ -127,13 +151,6 @@ const AddShopModal = ({
 
         {error && <div className="form-error">{error}</div>}
 
-        {isPickingLocation && (
-          <div className="map-picking-active-banner">
-            <MousePointer size={16} className="pulse-icon" />
-            <span>Map pointer active! Click anywhere on the map to capture exact location address.</span>
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="add-shop-form">
           <div className="form-group">
             <label><Coffee size={14} /> Shop Name *</label>
@@ -146,16 +163,16 @@ const AddShopModal = ({
             />
           </div>
 
-          <div className="form-group autocomplete-container">
+          <div className="form-group autocomplete-wrapper">
             <div className="label-with-action">
               <label><MapPin size={14} /> Street Address Location *</label>
               <button 
                 type="button" 
-                className={`pick-map-inline-btn ${isPickingLocation ? 'active' : ''}`}
+                className="pick-map-inline-btn"
                 onClick={handleStartPickOnMap}
               >
                 <Compass size={13} />
-                <span>{isPickingLocation ? 'Pointer Active 📍' : 'Point on Map'}</span>
+                <span>Point on Map</span>
               </button>
             </div>
 
@@ -175,9 +192,9 @@ const AddShopModal = ({
             </div>
 
             {suggestions.length > 0 && (
-              <ul className="autocomplete-dropdown">
+              <ul className="autocomplete-dropdown modal-autocomplete">
                 {suggestions.map((sug, idx) => (
-                  <li key={idx} onClick={() => handleSelectSuggestion(sug)}>
+                  <li key={idx} className="autocomplete-item" onClick={() => handleSelectSuggestion(sug)}>
                     <MapPin size={14} className="sug-icon" />
                     <span>{sug.display_name}</span>
                   </li>
@@ -186,7 +203,7 @@ const AddShopModal = ({
             )}
 
             <span className="input-hint">
-              📍 Select from autocomplete suggestions, click 'Point on Map', or enter full street address.
+              📍 Mandatorily select from autocomplete dropdown suggestions or click 'Point on Map'.
             </span>
           </div>
 
