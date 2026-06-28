@@ -21,13 +21,9 @@ app.use(cors({
 
 app.use(express.json());
 
-// Health check and keep-alive ping endpoints (for cron-job.org / uptime monitoring)
-app.get(['/', '/ping', '/api/health'], (req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    message: 'ChaiSpot API Server is alive and warm ☕',
-    timestamp: new Date().toISOString()
-  });
+// Health check and keep-alive ping endpoints (ultra-lightweight for cron-job.org)
+app.get(['/', '/ping', '/health', '/api/health'], (req, res) => {
+  res.status(200).send('OK');
 });
 
 // Routes
