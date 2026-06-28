@@ -540,7 +540,7 @@
 
 .map-picking-banner {
   position: absolute;
-  top: 20px;
+  top: 85px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(16, 185, 129, 0.95);
@@ -1431,7 +1431,7 @@
 /* Map Picking Floating Dock Bar */
 .map-picking-dock-overlay {
   position: fixed;
-  top: 20px;
+  top: 85px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 3500;

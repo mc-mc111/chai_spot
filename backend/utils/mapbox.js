@@ -6,7 +6,35 @@ const axios = require('axios');
  * @returns {Promise<{ coordinates: [number, number], formattedAddress: string }>}
  */
 const geocodeAddress = async (address) => {
-  const encodedAddress = encodeURIComponent(address.trim());
+  const trimmed = address.trim();
+
+  // Check if address matches coordinate string like "Point on Map (16.5184, 80.6440)" or "Location (16.5184, 80.6440)"
+  const coordMatch = trimmed.match(/(?:Point on Map|Location)?\s*\(?(-?\d+\.\d+),\s*(-?\d+\.\d+)\)?/i);
+  if (coordMatch) {
+    const lat = parseFloat(coordMatch[1]);
+    const lng = parseFloat(coordMatch[2]);
+    let formattedAddress = `Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+
+    try {
+      const revUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+      const revRes = await axios.get(revUrl, {
+        headers: { 'User-Agent': 'ChaiSpot-OpenSource-App/1.0 (contact@chaispot.app)' },
+        timeout: 4000
+      });
+      if (revRes.data && revRes.data.display_name) {
+        formattedAddress = revRes.data.display_name;
+      }
+    } catch (e) {
+      console.warn('Reverse geocoding fallback error:', e.message);
+    }
+
+    return {
+      coordinates: [lng, lat],
+      formattedAddress
+    };
+  }
+
+  const encodedAddress = encodeURIComponent(trimmed);
   const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`;
 
   try {

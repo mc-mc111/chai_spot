@@ -67,10 +67,21 @@ const ShopMap = ({
   useEffect(() => {
     if (!mapInstance.current) return;
 
-    const handleMapClick = (e) => {
+    const handleMapClick = async (e) => {
       if (isPickingLocation && onLocationPicked) {
         const { lat, lng } = e.latlng;
-        onLocationPicked([lng, lat], `Point on Map (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+        // Immediate fallback coordinate label
+        onLocationPicked([lng, lat], `Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const data = await res.json();
+          if (data && data.display_name) {
+            onLocationPicked([lng, lat], data.display_name);
+          }
+        } catch (err) {
+          console.warn('Reverse geocode fetch failed:', err);
+        }
       }
     };
 
