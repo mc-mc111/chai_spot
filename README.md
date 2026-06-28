@@ -27,6 +27,13 @@ ChaiSpot is a full-stack MERN platform designed for tea lovers to discover nearb
    - `MAPBOX_ACCESS_TOKEN`: `your_mapbox_access_token`
    - `CLIENT_URL`: `https://your-frontend-app.vercel.app`
 
+### ⏰ Keeping Render Awake 24/7 (cron-job.org setup)
+To prevent Render's free tier from spinning down after 15 minutes of inactivity:
+1. Create a free account on [cron-job.org](https://cron-job.org).
+2. Create a new cron job with the URL: `https://chai-spot.onrender.com/api/health`
+3. Set the execution schedule to **every 5 minutes** or **every 10 minutes**.
+4. Method: `GET`. Save the cron job!
+
 ### 2. Frontend Deployment on Vercel
 1. Import the repository in **Vercel**.
 2. Set Framework Preset to **Vite**.

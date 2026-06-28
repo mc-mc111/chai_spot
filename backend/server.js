@@ -34,9 +34,13 @@ app.use(cors({
 
 app.use(express.json());
 
-// Health check endpoint
-app.get('/', (req, res) => {
-  res.send('ChaiSpot API Server is running...');
+// Health check and keep-alive ping endpoints (for cron-job.org / uptime monitoring)
+app.get(['/', '/ping', '/api/health'], (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'ChaiSpot API Server is alive and warm ☕',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Routes
