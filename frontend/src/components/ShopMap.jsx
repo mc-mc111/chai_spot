@@ -1,104 +1,73 @@
 import React, { useEffect, useRef } from 'react';
-import mapboxgl from 'mapbox-gl';
-import { Star, Navigation, ArrowRight } from 'lucide-react';
+import L from 'leaflet';
 
 const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, routeGeoJson }) => {
   const mapContainer = useRef(null);
-  const map = useRef(null);
+  const mapInstance = useRef(null);
   const markersRef = useRef([]);
-
-  const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
+  const routeLayerRef = useRef(null);
 
   useEffect(() => {
-    if (!mapboxToken) {
-      console.error('Mapbox token missing from environment variables.');
-      return;
-    }
-    mapboxgl.accessToken = mapboxToken;
+    if (mapInstance.current) return; // Initialize map once
 
-    if (map.current) return; // initialize map only once
+    // Default center (Hyderabad, India / central hub) [lat, lng]
+    const defaultCenter = [17.3850, 78.4867];
 
-    // Default center (e.g., Hyderabad, India / central hub)
-    const defaultCenter = [78.4867, 17.3850];
-
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
+    const map = L.map(mapContainer.current, {
       center: defaultCenter,
-      zoom: 12
+      zoom: 12,
+      zoomControl: true
     });
 
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-    map.current.addControl(
-      new mapboxgl.GeolocateControl({
-        positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: true,
-        showUserHeading: true
-      }),
-      'top-right'
-    );
+    // Open-source dark map tiles (CartoDB Dark Matter)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(map);
 
-    map.current.on('error', (e) => {
-      console.error('Mapbox GL error:', e);
-    });
+    mapInstance.current = map;
 
-    map.current.on('load', () => {
-      // Add source for directions route
-      map.current.addSource('route', {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'LineString',
-            coordinates: []
-          }
-        }
-      });
-
-      map.current.addLayer({
-        id: 'route',
-        type: 'line',
-        source: 'route',
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round'
-        },
-        paint: {
-          'line-color': '#f97316',
-          'line-width': 5,
-          'line-opacity': 0.85
-        }
-      });
-    });
-  }, [mapboxToken]);
+    return () => {
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
+    };
+  }, []);
 
   // Handle route geometry updates
   useEffect(() => {
-    if (!map.current || !map.current.isStyleLoaded()) return;
-    const routeSource = map.current.getSource('route');
-    if (routeSource) {
-      if (routeGeoJson) {
-        routeSource.setData(routeGeoJson);
-        // Fit bounds to route
-        const coordinates = routeGeoJson.geometry.coordinates;
-        if (coordinates.length > 0) {
-          const bounds = coordinates.reduce((b, coord) => b.extend(coord), new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
-          map.current.fitBounds(bounds, { padding: 80 });
+    if (!mapInstance.current) return;
+
+    if (routeLayerRef.current) {
+      mapInstance.current.removeLayer(routeLayerRef.current);
+      routeLayerRef.current = null;
+    }
+
+    if (routeGeoJson && routeGeoJson.geometry) {
+      const routeLayer = L.geoJSON(routeGeoJson, {
+        style: {
+          color: '#f97316',
+          weight: 5,
+          opacity: 0.85,
+          lineCap: 'round',
+          lineJoin: 'round'
         }
-      } else {
-        routeSource.setData({
-          type: 'Feature',
-          properties: {},
-          geometry: { type: 'LineString', coordinates: [] }
-        });
+      }).addTo(mapInstance.current);
+
+      routeLayerRef.current = routeLayer;
+
+      const bounds = routeLayer.getBounds();
+      if (bounds.isValid()) {
+        mapInstance.current.fitBounds(bounds, { padding: [50, 50] });
       }
     }
   }, [routeGeoJson]);
 
   // Render markers whenever shops update
   useEffect(() => {
-    if (!map.current) return;
+    if (!mapInstance.current) return;
 
     // Clear existing markers
     markersRef.current.forEach(marker => marker.remove());
@@ -106,26 +75,32 @@ const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, route
 
     if (!shops || shops.length === 0) return;
 
-    const bounds = new mapboxgl.LngLatBounds();
+    const boundsGroup = [];
 
     shops.forEach(shop => {
       if (!shop.location || !shop.location.coordinates) return;
       const [lng, lat] = shop.location.coordinates;
-      bounds.extend([lng, lat]);
+      boundsGroup.push([lat, lng]);
 
-      // Custom HTML Marker element
-      const el = document.createElement('div');
-      el.className = 'custom-map-marker';
-      el.innerHTML = `
-        <div class="marker-pin">
-          <span class="marker-icon">☕</span>
-        </div>
-        <div class="marker-label">${shop.name}</div>
-      `;
+      // Custom HTML Marker icon using Leaflet DivIcon
+      const customIcon = L.divIcon({
+        className: 'leaflet-custom-marker',
+        html: `
+          <div class="custom-map-marker">
+            <div class="marker-pin">
+              <span class="marker-icon">☕</span>
+            </div>
+            <div class="marker-label">${shop.name}</div>
+          </div>
+        `,
+        iconSize: [40, 50],
+        iconAnchor: [20, 50],
+        popupAnchor: [0, -45]
+      });
 
-      const popupNode = document.createElement('div');
-      popupNode.className = 'map-popup-inner';
-      popupNode.innerHTML = `
+      const popupContent = document.createElement('div');
+      popupContent.className = 'map-popup-inner';
+      popupContent.innerHTML = `
         <h3 class="popup-title">${shop.name}</h3>
         <p class="popup-address">${shop.address}</p>
         <div class="popup-rating">
@@ -139,10 +114,10 @@ const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, route
         </div>
       `;
 
-      // Attach click events after popup mounts
-      const popup = new mapboxgl.Popup({ offset: 25 }).setDOMContent(popupNode);
+      const marker = L.marker([lat, lng], { icon: customIcon }).addTo(mapInstance.current);
+      marker.bindPopup(popupContent);
 
-      popup.on('open', () => {
+      marker.on('popupopen', () => {
         const detailsBtn = document.getElementById(`popup-details-${shop._id}`);
         const directionsBtn = document.getElementById(`popup-directions-${shop._id}`);
 
@@ -154,39 +129,26 @@ const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, route
         }
       });
 
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat([lng, lat])
-        .setPopup(popup)
-        .addTo(map.current);
-
       markersRef.current.push(marker);
     });
 
-    if (shops.length > 0 && !routeGeoJson) {
-      map.current.fitBounds(bounds, { padding: 60, maxZoom: 14 });
+    if (boundsGroup.length > 0 && !routeGeoJson) {
+      const bounds = L.latLngBounds(boundsGroup);
+      mapInstance.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
     }
   }, [shops, onSelectShop, onRequestDirections, routeGeoJson]);
 
-  // Fly to selected shop when chosen from list
+  // Pan to selected shop when chosen from list
   useEffect(() => {
-    if (map.current && selectedShop && selectedShop.location) {
+    if (mapInstance.current && selectedShop && selectedShop.location) {
       const [lng, lat] = selectedShop.location.coordinates;
-      map.current.flyTo({
-        center: [lng, lat],
-        zoom: 15,
-        essential: true
-      });
+      mapInstance.current.flyTo([lat, lng], 15, { duration: 1.2 });
     }
   }, [selectedShop]);
 
   return (
     <div className="map-wrapper">
-      <div ref={mapContainer} className="mapbox-container" />
-      {!mapboxToken && (
-        <div className="map-error-overlay">
-          <p>⚠️ Mapbox token missing in environment configuration.</p>
-        </div>
-      )}
+      <div ref={mapContainer} className="mapbox-container" style={{ width: '100%', height: '100%' }} />
     </div>
   );
 };

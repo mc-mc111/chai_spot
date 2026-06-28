@@ -1,4 +1,4 @@
-@import 'mapbox-gl/dist/mapbox-gl.css';
+@import 'leaflet/dist/leaflet.css';
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 :root {
@@ -79,33 +79,35 @@ input, textarea, select {
   background: var(--chai-warm);
 }
 
-/* Mapbox Customizations */
-.mapboxgl-popup-content {
+/* Leaflet Customizations */
+.leaflet-popup-content-wrapper {
   background: rgba(24, 21, 23, 0.95) !important;
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md) !important;
   color: var(--text-main) !important;
-  padding: 16px !important;
+  padding: 8px !important;
   box-shadow: var(--shadow-card) !important;
 }
 
-.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
-  border-top-color: rgba(24, 21, 23, 0.95) !important;
+.leaflet-popup-tip {
+  background: rgba(24, 21, 23, 0.95) !important;
 }
 
-.mapboxgl-popup-close-button {
+.leaflet-popup-close-button {
   color: var(--text-muted) !important;
   font-size: 18px !important;
   padding: 4px 8px !important;
 }
 
-.mapboxgl-ctrl-group {
-  background: rgba(24, 21, 23, 0.85) !important;
+.leaflet-control-zoom {
   border: 1px solid var(--border-color) !important;
-  backdrop-filter: blur(8px);
+  border-radius: 8px !important;
+  overflow: hidden;
 }
 
-.mapboxgl-ctrl-group button {
+.leaflet-control-zoom a {
+  background: rgba(24, 21, 23, 0.85) !important;
+  color: #fff !important;
   border-bottom-color: var(--border-color) !important;
 }

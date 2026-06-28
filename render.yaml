@@ -12,7 +12,5 @@ services:
         sync: false
       - key: JWT_SECRET
         sync: false
-      - key: MAPBOX_ACCESS_TOKEN
-        sync: false
       - key: CLIENT_URL
         sync: false
