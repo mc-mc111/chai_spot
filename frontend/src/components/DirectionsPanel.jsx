@@ -130,6 +130,9 @@ const DirectionsPanel = ({
           properties: {},
           geometry: route.geometry
         });
+        if (onShiftToMap) {
+          onShiftToMap();
+        }
         onShowToast('🗺️ Route calculated successfully!', 'success');
       }
     } catch (err) {
