@@ -264,9 +264,18 @@ function App() {
 
       {showAddShop && (
         <AddShopModal 
-          onClose={() => setShowAddShop(false)}
+          onClose={() => {
+            setShowAddShop(false);
+            setIsPickingLocation(false);
+            setPickedLocation(null);
+          }}
           onShopAdded={handleShopAdded}
           onShowToast={showToastNotification}
+          isPickingLocation={isPickingLocation}
+          setIsPickingLocation={setIsPickingLocation}
+          pickedLocation={pickedLocation}
+          setPickedLocation={setPickedLocation}
+          onShiftToMap={() => setActiveTab('map')}
         />
       )}
 
