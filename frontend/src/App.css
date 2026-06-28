@@ -338,24 +338,56 @@
   color: #fff;
 }
 
-/* Directions Panel */
-.directions-panel {
+/* Google Maps Style Side Panels (Directions & Spot Details) */
+.directions-panel, .google-maps-side-panel {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  width: 360px;
-  max-height: calc(100% - 40px);
-  background: rgba(24, 21, 23, 0.95);
+  top: 16px;
+  left: 16px;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100% - 32px);
+  background: rgba(20, 18, 20, 0.95);
   backdrop-filter: blur(20px);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 20px;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
   z-index: 2000 !important;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.directions-panel {
+  padding: 20px;
   gap: 16px;
+}
+
+.side-panel-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.side-panel-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .panel-header {
@@ -500,8 +532,61 @@
   font-size: 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   color: #ddd;
+}
+
+.step-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.step-text {
+  flex: 1;
+  color: #eee;
+  font-weight: 500;
+}
+
+.step-dist {
+  color: var(--chai-gold);
+  font-weight: 700;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.login-prompt-card {
+  background: rgba(249, 115, 22, 0.08);
+  border: 1px dashed rgba(249, 115, 22, 0.3);
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.login-prompt-card p {
+  font-size: 13px;
+  color: #ddd;
+  line-height: 1.4;
+}
+
+.auth-prompt-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--primary-orange), var(--chai-warm));
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 13px;
 }
 
 /* Shop Discovery List */

@@ -109,10 +109,27 @@ function App() {
                 <ShopMap 
                   shops={shops} 
                   selectedShop={selectedShop}
-                  onSelectShop={(shop) => setSelectedShop(shop)}
+                  onSelectShop={(shop) => {
+                    setDirectionsTarget(null);
+                    setSelectedShop(shop);
+                  }}
                   onRequestDirections={handleRequestDirections}
                   routeGeoJson={routeGeoJson}
                 />
+
+                {selectedShop && !directionsTarget && (
+                  <ShopModal 
+                    shop={selectedShop}
+                    onClose={() => setSelectedShop(null)}
+                    onRequestDirections={(shop) => {
+                      setSelectedShop(null);
+                      handleRequestDirections(shop);
+                    }}
+                    onUpdateShopMetrics={handleUpdateShopMetrics}
+                    onShowToast={showToastNotification}
+                    onOpenAuth={() => setShowAuth(true)}
+                  />
+                )}
 
                 {directionsTarget && (
                   <DirectionsPanel 
@@ -129,23 +146,16 @@ function App() {
             {activeTab === 'list' && (
               <ShopList 
                 shops={shops}
-                onSelectShop={(shop) => setSelectedShop(shop)}
+                onSelectShop={(shop) => {
+                  setSelectedShop(shop);
+                  setActiveTab('map');
+                }}
                 onRequestDirections={handleRequestDirections}
               />
             )}
           </div>
         )}
       </main>
-
-      {selectedShop && (
-        <ShopModal 
-          shop={selectedShop}
-          onClose={() => setSelectedShop(null)}
-          onRequestDirections={handleRequestDirections}
-          onUpdateShopMetrics={handleUpdateShopMetrics}
-          onShowToast={showToastNotification}
-        />
-      )}
 
       {showAddShop && (
         <AddShopModal 

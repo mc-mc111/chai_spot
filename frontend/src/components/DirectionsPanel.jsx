@@ -180,12 +180,21 @@ const DirectionsPanel = ({ targetShop, shops, onClose, onRouteCalculated, onShow
             <div className="turn-instructions">
               <h4>Step-by-Step Directions</h4>
               <ol>
-                {routeInfo.steps.map((step, idx) => (
-                  <li key={idx}>
-                    <span>{step.maneuver.instruction}</span>
-                    <small>({(step.distance / 1000).toFixed(1)} km)</small>
-                  </li>
-                ))}
+                {routeInfo.steps.map((step, idx) => {
+                  const type = step.maneuver?.type || 'drive';
+                  const modifier = step.maneuver?.modifier ? ` ${step.maneuver.modifier}` : '';
+                  const street = step.name ? ` onto ${step.name}` : '';
+                  let text = `${type.charAt(0).toUpperCase() + type.slice(1)}${modifier}${street}`;
+                  if (type === 'depart') text = `Head out${modifier}${street}`;
+                  if (type === 'arrive') text = `Arrive at destination`;
+
+                  return (
+                    <li key={idx} className="step-item">
+                      <span className="step-text">{text}</span>
+                      <span className="step-dist">({(step.distance / 1000).toFixed(1)} km)</span>
+                    </li>
+                  );
+                })}
               </ol>
             </div>
           )}
