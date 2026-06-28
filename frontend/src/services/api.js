@@ -33,7 +33,8 @@ export const shopAPI = {
   createShop: (data) => api.post('/shops', data),
   getDirections: (startLng, startLat, endLng, endLat) => 
     api.get(`/shops/directions?startLng=${startLng}&startLat=${startLat}&endLng=${endLng}&endLat=${endLat}`),
-  geocodeStart: (address) => api.get(`/shops/geocode-start?address=${encodeURIComponent(address)}`)
+  geocodeStart: (address) => api.get(`/shops/geocode-start?address=${encodeURIComponent(address)}`),
+  getAutocomplete: (query) => api.get(`/shops/autocomplete?q=${encodeURIComponent(query)}`)
 };
 
 export const reviewAPI = {

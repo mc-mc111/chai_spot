@@ -24,6 +24,8 @@ function App() {
   const [showAuth, setShowAuth] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [directionsTarget, setDirectionsTarget] = useState(null);
+  const [isPickingLocation, setIsPickingLocation] = useState(false);
+  const [pickedLocation, setPickedLocation] = useState(null);
   
   // Navigation route geometry
   const [routeGeoJson, setRouteGeoJson] = useState(null);
@@ -115,6 +117,13 @@ function App() {
                   }}
                   onRequestDirections={handleRequestDirections}
                   routeGeoJson={routeGeoJson}
+                  isPickingLocation={isPickingLocation}
+                  pickedLocation={pickedLocation}
+                  onLocationPicked={(coords, addressName) => {
+                    setPickedLocation({ coords, addressName });
+                    setIsPickingLocation(false);
+                    showToastNotification('📍 Starting location set from map click!', 'success');
+                  }}
                 />
 
                 {selectedShop && !directionsTarget && (
@@ -135,9 +144,17 @@ function App() {
                   <DirectionsPanel 
                     targetShop={directionsTarget}
                     shops={shops}
-                    onClose={() => setDirectionsTarget(null)}
+                    onClose={() => {
+                      setDirectionsTarget(null);
+                      setIsPickingLocation(false);
+                      setPickedLocation(null);
+                    }}
                     onRouteCalculated={(geoJson) => setRouteGeoJson(geoJson)}
                     onShowToast={showToastNotification}
+                    isPickingLocation={isPickingLocation}
+                    setIsPickingLocation={setIsPickingLocation}
+                    pickedLocation={pickedLocation}
+                    setPickedLocation={setPickedLocation}
                   />
                 )}
               </div>

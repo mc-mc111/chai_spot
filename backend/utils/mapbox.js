@@ -35,7 +35,7 @@ const geocodeAddress = async (address) => {
   } catch (err) {
     if (err.statusCode) throw err;
     const error = new Error(err.response?.data?.message || 'Failed to communicate with OpenStreetMap Nominatim geocoding service.');
-    error.statusCode = 502;
+    error.statusCode = 400;
     throw error;
   }
 };
@@ -49,22 +49,49 @@ const getDirections = async (startCoords, endCoords) => {
   const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson&steps=true`;
 
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(url, { timeout: 10000 });
     if (!response.data.routes || response.data.routes.length === 0) {
-      const error = new Error('No route found between the specified locations.');
-      error.statusCode = 404;
+      const error = new Error('No driving route found between the specified locations. Please select a closer starting point.');
+      error.statusCode = 400;
       throw error;
     }
     return response.data;
   } catch (err) {
     if (err.statusCode) throw err;
-    const error = new Error(err.response?.data?.message || 'Failed to fetch directions from OSRM routing service.');
-    error.statusCode = 502;
+    const error = new Error('No valid driving route found between these locations (e.g. across water/continents). Please choose a valid starting location.');
+    error.statusCode = 400;
     throw error;
+  }
+};
+
+/**
+ * Autocomplete address queries using Nominatim.
+ */
+const autocompleteAddress = async (query) => {
+  if (!query || query.trim().length < 2) return [];
+  const encoded = encodeURIComponent(query.trim());
+  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encoded}&limit=5`;
+
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'ChaiSpot-OpenSource-App/1.0 (contact@chaispot.app)'
+      },
+      timeout: 5000
+    });
+    return (response.data || []).map(item => ({
+      display_name: item.display_name,
+      lat: parseFloat(item.lat),
+      lng: parseFloat(item.lon)
+    }));
+  } catch (err) {
+    console.error('Autocomplete API error:', err.message);
+    return [];
   }
 };
 
 module.exports = {
   geocodeAddress,
-  getDirections
+  getDirections,
+  autocompleteAddress
 };

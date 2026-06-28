@@ -1,16 +1,25 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 
-const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, routeGeoJson }) => {
+const ShopMap = ({ 
+  shops, 
+  selectedShop, 
+  onSelectShop, 
+  onRequestDirections, 
+  routeGeoJson,
+  isPickingLocation,
+  pickedLocation,
+  onLocationPicked 
+}) => {
   const mapContainer = useRef(null);
   const mapInstance = useRef(null);
   const markersRef = useRef([]);
   const routeLayerRef = useRef(null);
+  const pickedMarkerRef = useRef(null);
 
   useEffect(() => {
     if (mapInstance.current) return; // Initialize map once
 
-    // Default center (Vijayawada, Andhra Pradesh) [lat, lng]
     const defaultCenter = [16.5062, 80.6480];
 
     const map = L.map(mapContainer.current, {
@@ -19,7 +28,6 @@ const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, route
       zoomControl: true
     });
 
-    // Open-source dark map tiles (CartoDB Dark Matter)
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: 'abcd',
@@ -28,7 +36,6 @@ const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, route
 
     mapInstance.current = map;
 
-    // Trigger invalidateSize after container renders to guarantee full coverage
     setTimeout(() => {
       if (mapInstance.current) {
         mapInstance.current.invalidateSize();
@@ -50,6 +57,55 @@ const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, route
       }
     };
   }, []);
+
+  // Map Click Listener for picking starting location
+  useEffect(() => {
+    if (!mapInstance.current) return;
+
+    const handleMapClick = (e) => {
+      if (isPickingLocation && onLocationPicked) {
+        const { lat, lng } = e.latlng;
+        onLocationPicked([lng, lat], `Point on Map (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+      }
+    };
+
+    mapInstance.current.on('click', handleMapClick);
+    return () => {
+      if (mapInstance.current) {
+        mapInstance.current.off('click', handleMapClick);
+      }
+    };
+  }, [isPickingLocation, onLocationPicked]);
+
+  // Handle picked location pin
+  useEffect(() => {
+    if (!mapInstance.current) return;
+
+    if (pickedMarkerRef.current) {
+      pickedMarkerRef.current.remove();
+      pickedMarkerRef.current = null;
+    }
+
+    if (pickedLocation && pickedLocation.coords) {
+      const [lng, lat] = pickedLocation.coords;
+      const startIcon = L.divIcon({
+        className: 'leaflet-custom-marker',
+        html: `
+          <div class="custom-map-marker start-pin">
+            <div class="marker-pin start">
+              <span class="marker-icon">📍</span>
+            </div>
+            <div class="marker-label start">Starting Point</div>
+          </div>
+        `,
+        iconSize: [40, 50],
+        iconAnchor: [20, 50]
+      });
+
+      const marker = L.marker([lat, lng], { icon: startIcon }).addTo(mapInstance.current);
+      pickedMarkerRef.current = marker;
+    }
+  }, [pickedLocation]);
 
   // Handle route geometry updates
   useEffect(() => {
@@ -80,11 +136,10 @@ const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, route
     }
   }, [routeGeoJson]);
 
-  // Render markers whenever shops update
+  // Render shop markers
   useEffect(() => {
     if (!mapInstance.current) return;
 
-    // Clear existing markers
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
 
@@ -97,7 +152,6 @@ const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, route
       const [lng, lat] = shop.location.coordinates;
       boundsGroup.push([lat, lng]);
 
-      // Custom HTML Marker icon using Leaflet DivIcon
       const customIcon = L.divIcon({
         className: 'leaflet-custom-marker',
         html: `
@@ -153,13 +207,13 @@ const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, route
       markersRef.current.push(marker);
     });
 
-    if (boundsGroup.length > 0 && !routeGeoJson) {
+    if (boundsGroup.length > 0 && !routeGeoJson && !pickedLocation) {
       const bounds = L.latLngBounds(boundsGroup);
       mapInstance.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
     }
-  }, [shops, onSelectShop, onRequestDirections, routeGeoJson]);
+  }, [shops, onSelectShop, onRequestDirections, routeGeoJson, pickedLocation]);
 
-  // Pan to selected shop when chosen from list
+  // Pan to selected shop
   useEffect(() => {
     if (mapInstance.current && selectedShop && selectedShop.location) {
       const [lng, lat] = selectedShop.location.coordinates;
@@ -168,8 +222,13 @@ const ShopMap = ({ shops, selectedShop, onSelectShop, onRequestDirections, route
   }, [selectedShop]);
 
   return (
-    <div className="map-wrapper">
+    <div className={`map-wrapper ${isPickingLocation ? 'picking-mode' : ''}`}>
       <div ref={mapContainer} className="mapbox-container" />
+      {isPickingLocation && (
+        <div className="map-picking-banner">
+          <span>🎯 Click anywhere on the map to set starting point</span>
+        </div>
+      )}
     </div>
   );
 };

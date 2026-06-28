@@ -1,5 +1,5 @@
 const Shop = require('../models/Shop');
-const { geocodeAddress, getDirections } = require('../utils/mapbox');
+const { geocodeAddress, getDirections, autocompleteAddress } = require('../utils/mapbox');
 
 // @desc    Get all chai shops
 // @route   GET /api/shops
@@ -103,10 +103,23 @@ const geocodeStart = async (req, res) => {
   }
 };
 
+// @desc    Autocomplete address query for search dropdown
+// @route   GET /api/shops/autocomplete
+const getAutocomplete = async (req, res) => {
+  try {
+    const { q } = req.query;
+    const suggestions = await autocompleteAddress(q);
+    res.json(suggestions);
+  } catch (error) {
+    res.json([]);
+  }
+};
+
 module.exports = {
   getShops,
   getShopById,
   createShop,
   getDirectionsRoute,
-  geocodeStart
+  geocodeStart,
+  getAutocomplete
 };

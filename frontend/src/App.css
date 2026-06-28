@@ -469,6 +469,91 @@
   background: var(--bg-primary);
 }
 
+.autocomplete-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #181517;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 300;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+  list-style: none;
+  padding: 4px 0;
+}
+
+.autocomplete-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #ddd;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.autocomplete-item:hover {
+  background: rgba(249, 115, 22, 0.2);
+  color: #fff;
+}
+
+.map-pick-status {
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.3);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.pick-instruction {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.pick-success {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.map-wrapper.picking-mode {
+  cursor: crosshair !important;
+}
+
+.map-picking-banner {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(16, 185, 129, 0.95);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  z-index: 2500;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  pointer-events: none;
+  animation: pulse 2s infinite;
+}
+
+.marker-pin.start {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+}
+
+.marker-label.start {
+  background: rgba(16, 185, 129, 0.9) !important;
+}
+
 .find-route-btn {
   display: flex;
   align-items: center;

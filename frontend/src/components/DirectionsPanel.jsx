@@ -1,20 +1,73 @@
-import React, { useState, useEffect } from 'react';
-import { Navigation, MapPin, Compass, X, AlertCircle, Clock, Route } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Navigation, MapPin, Compass, X, AlertCircle, Clock, Route, MousePointer } from 'lucide-react';
 import { shopAPI } from '../services/api';
 
-const DirectionsPanel = ({ targetShop, shops, onClose, onRouteCalculated, onShowToast }) => {
+const DirectionsPanel = ({ 
+  targetShop, 
+  shops, 
+  onClose, 
+  onRouteCalculated, 
+  onShowToast,
+  isPickingLocation,
+  setIsPickingLocation,
+  pickedLocation,
+  setPickedLocation
+}) => {
   const [selectedDestination, setSelectedDestination] = useState(targetShop || (shops.length > 0 ? shops[0] : null));
-  const [startType, setStartType] = useState('gps'); // 'gps' or 'manual'
+  const [startType, setStartType] = useState('gps'); // 'gps', 'manual', or 'map'
   const [manualAddress, setManualAddress] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [selectedSuggestion, setSelectedSuggestion] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [routeInfo, setRouteInfo] = useState(null);
+
+  const autocompleteTimer = useRef(null);
 
   useEffect(() => {
     if (targetShop) {
       setSelectedDestination(targetShop);
     }
   }, [targetShop]);
+
+  useEffect(() => {
+    if (pickedLocation && startType === 'map') {
+      setSelectedSuggestion({
+        coords: pickedLocation.coords,
+        display_name: pickedLocation.addressName
+      });
+    }
+  }, [pickedLocation, startType]);
+
+  const handleAddressInputChange = (e) => {
+    const val = e.target.value;
+    setManualAddress(val);
+    setSelectedSuggestion(null);
+
+    if (autocompleteTimer.current) clearTimeout(autocompleteTimer.current);
+
+    if (val.trim().length >= 2) {
+      autocompleteTimer.current = setTimeout(async () => {
+        try {
+          const res = await shopAPI.getAutocomplete(val);
+          setSuggestions(res.data || []);
+        } catch (err) {
+          setSuggestions([]);
+        }
+      }, 300);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  const handleSelectSuggestion = (sug) => {
+    setManualAddress(sug.display_name);
+    setSelectedSuggestion({
+      coords: [sug.lng, sug.lat],
+      display_name: sug.display_name
+    });
+    setSuggestions([]);
+  };
 
   const handleCalculateRoute = async (e) => {
     if (e) e.preventDefault();
@@ -35,21 +88,29 @@ const DirectionsPanel = ({ targetShop, shops, onClose, onRouteCalculated, onShow
       if (startType === 'gps') {
         startCoords = await new Promise((resolve, reject) => {
           if (!navigator.geolocation) {
-            reject(new Error('Browser geolocation is not supported by your browser. Please select manual address.'));
+            reject(new Error('Geolocation is not supported by your browser. Please select Enter Address or Pick on Map.'));
             return;
           }
           navigator.geolocation.getCurrentPosition(
             (pos) => resolve([pos.coords.longitude, pos.coords.latitude]),
-            (err) => reject(new Error('Geolocation failed or denied. Please enter a manual starting location.')),
+            (err) => reject(new Error('GPS location permission denied or timed out. Please select Enter Address or Pick on Map.')),
             { timeout: 8000 }
           );
         });
-      } else {
-        if (!manualAddress.trim()) {
-          throw new Error('Please enter a valid starting address.');
+      } else if (startType === 'map') {
+        if (!pickedLocation || !pickedLocation.coords) {
+          throw new Error('Please click anywhere on the map to set your starting location.');
         }
-        const geocodeRes = await shopAPI.geocodeStart(manualAddress);
-        startCoords = geocodeRes.data.coordinates;
+        startCoords = pickedLocation.coords;
+      } else { // manual address
+        if (selectedSuggestion && selectedSuggestion.coords) {
+          startCoords = selectedSuggestion.coords;
+        } else if (manualAddress.trim()) {
+          const geocodeRes = await shopAPI.geocodeStart(manualAddress);
+          startCoords = geocodeRes.data.coordinates;
+        } else {
+          throw new Error('Please select an address from the autocomplete suggestions or enter a location.');
+        }
       }
 
       const directionsRes = await shopAPI.getDirections(startCoords[0], startCoords[1], endLng, endLat);
@@ -71,7 +132,7 @@ const DirectionsPanel = ({ targetShop, shops, onClose, onRouteCalculated, onShow
       }
     } catch (err) {
       console.error('Directions error:', err);
-      const msg = err.message || err.response?.data?.message || 'Failed to fetch directions.';
+      const msg = err.response?.data?.message || err.message || 'Failed to fetch directions.';
       setError(msg);
       onShowToast(msg, 'error');
     } finally {
@@ -81,6 +142,8 @@ const DirectionsPanel = ({ targetShop, shops, onClose, onRouteCalculated, onShow
 
   const handleClear = () => {
     onRouteCalculated(null);
+    setIsPickingLocation(false);
+    setPickedLocation(null);
     onClose();
   };
 
@@ -91,7 +154,7 @@ const DirectionsPanel = ({ targetShop, shops, onClose, onRouteCalculated, onShow
           <Navigation size={20} className="nav-icon" />
           <h3>Get Directions</h3>
         </div>
-        <button className="panel-close" onClick={handleClear}>
+        <button className="side-panel-close-btn" onClick={handleClear} title="Close Panel">
           <X size={18} />
         </button>
       </div>
@@ -110,28 +173,71 @@ const DirectionsPanel = ({ targetShop, shops, onClose, onRouteCalculated, onShow
             <button
               type="button"
               className={`tab-btn ${startType === 'gps' ? 'active' : ''}`}
-              onClick={() => setStartType('gps')}
+              onClick={() => {
+                setStartType('gps');
+                setIsPickingLocation(false);
+              }}
             >
               My GPS Location
             </button>
             <button
               type="button"
               className={`tab-btn ${startType === 'manual' ? 'active' : ''}`}
-              onClick={() => setStartType('manual')}
+              onClick={() => {
+                setStartType('manual');
+                setIsPickingLocation(false);
+              }}
             >
               Enter Address
+            </button>
+            <button
+              type="button"
+              className={`tab-btn ${startType === 'map' ? 'active' : ''}`}
+              onClick={() => {
+                setStartType('map');
+                setIsPickingLocation(true);
+              }}
+            >
+              <MousePointer size={12} />
+              <span>Pick on Map</span>
             </button>
           </div>
 
           {startType === 'manual' && (
-            <input 
-              type="text" 
-              className="panel-input"
-              placeholder="e.g. Hitech City, Hyderabad" 
-              value={manualAddress}
-              onChange={(e) => setManualAddress(e.target.value)}
-              required
-            />
+            <div className="autocomplete-wrapper">
+              <input 
+                type="text" 
+                className="panel-input"
+                placeholder="Type location (e.g. Benz Circle, Patamata)..." 
+                value={manualAddress}
+                onChange={handleAddressInputChange}
+                required
+              />
+              {suggestions.length > 0 && (
+                <ul className="autocomplete-dropdown">
+                  {suggestions.map((sug, idx) => (
+                    <li 
+                      key={idx} 
+                      onClick={() => handleSelectSuggestion(sug)}
+                      className="autocomplete-item"
+                    >
+                      <MapPin size={14} />
+                      <span>{sug.display_name}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {startType === 'map' && (
+            <div className="map-pick-status">
+              {pickedLocation ? (
+                <p className="pick-success">📍 {pickedLocation.addressName}</p>
+              ) : (
+                <p className="pick-instruction">Click anywhere on the map to set start point</p>
+              )}
+            </div>
           )}
         </div>
 
